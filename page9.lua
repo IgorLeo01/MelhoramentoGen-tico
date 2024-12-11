@@ -2,6 +2,19 @@ local composer = require("composer")
 local widget = require("widget")
 local physics = require("physics")  
 local scene = composer.newScene()
+local audio = require("audio")
+
+local soundOn = true
+local narration
+local narrationTimer
+local soundIcon
+
+local function playNarrationWithDelay()
+    if soundOn then
+        audio.play(narration)
+        narrationTimer = timer.performWithDelay(3000, playNarrationWithDelay)
+    end
+end
 
 function scene:create(event)
     local sceneGroup = self.view
@@ -28,30 +41,6 @@ function scene:create(event)
     })
     pageNumber:setFillColor(0, 0, 0)
     scrollView:insert(pageNumber)
-
-    local soundIcon = display.newRect(display.contentWidth - 60, 60, 40, 40)
-    soundIcon.fill = {
-        type = "image",
-        filename = "images/ComponentSound.png"
-    }
-    sceneGroup:insert(soundIcon)
-
-    local function toggleSound()
-        soundOn = not soundOn
-        if soundOn then
-            soundIcon.fill = {
-                type = "image",
-                filename = "images/ComponentSound.png"
-            }
-        else
-            soundIcon.fill = {
-                type = "image",
-                filename = "images/ComponentSoundMute.png"
-            }
-        end
-    end
-
-    soundIcon:addEventListener("tap", toggleSound)
 
     local topLeafIcon = display.newImageRect("images/FolhaSuperior.png", 136, 165)
     topLeafIcon.x = 530 + (136 / 2) 
@@ -82,11 +71,10 @@ function scene:create(event)
     description:setFillColor(0, 0, 0)
     scrollView:insert(description)
 
-    -- Seção Benefícios
     local benefitsTitle = display.newText({
         text = "Benefícios:",
         x = 78,
-        y = 388,
+        y = 400,
         font = "Inter",
         fontSize = 24,
         align = "left"
@@ -97,7 +85,7 @@ function scene:create(event)
     local AumentoDaProdutividadeTitle = display.newText({
         text = "Aumento da produtividade agrícola:",
         x = 152,
-        y = 420,
+        y = 430,
         width = 290,
         font = "Inter",
         fontSize = 17,
@@ -256,7 +244,7 @@ function scene:create(event)
     --publicResistanceDescription.isVisible = false -- Não consegui fazer com que a flag mudasse usando o Shake do solar2d
     scrollView:insert(publicResistanceDescription)
 
-    local line = display.newRect(display.contentCenterX - 60, 700, 2, 600) 
+    local line = display.newRect(display.contentCenterX - 90, 700, 2, 500) 
     line:setFillColor(0, 0, 0) 
     scrollView:insert(line)
 
@@ -265,7 +253,7 @@ function scene:create(event)
         width = 74,
         height = 32,
         x = 296 + (74 / 2),
-        y = 1200,
+        y = 1100,
         shape = "rect",
         font = "Inter",
         fontSize = 18,
@@ -321,7 +309,7 @@ function scene:create(event)
         width = 88,
         height = 32,
         x = 408 + (88 / 2),
-        y = 1200,
+        y = 1100,
         shape = "rect",
         font = "Inter",
         fontSize = 18,
@@ -338,8 +326,64 @@ function scene:create(event)
         end
     })
     scrollView:insert(nextButton)
+    narration = audio.loadStream("audio/Página9.wav")
+
+    local function toggleSound()
+        soundOn = not soundOn
+        if soundOn then
+            soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" }
+            print("Som ativado!")
+            playNarrationWithDelay()
+        else
+            soundIcon.fill = { type = "image", filename = "images/ComponentSoundMute.png" }
+            print("Som desativado!")
+            if narrationTimer then
+                timer.cancel(narrationTimer)
+            end
+            audio.stop()
+        end
+    end
+    
+    soundIcon = display.newRect(display.contentWidth - 60, 110, 40, 40)
+    soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" } 
+    soundIcon:setFillColor(1, 1, 1)
+    soundIcon:addEventListener("tap", toggleSound) 
+    sceneGroup:insert(soundIcon) 
+
+end
+
+function scene:show(event)
+    if event.phase == "did" then
+        
+        audio.stop()  
+        
+        if soundOn then
+            audio.rewind(narration)  
+            playNarrationWithDelay()
+        end
+    end
+end
+
+
+function scene:hide(event)
+    if event.phase == "will" then
+        if narrationTimer then
+            timer.cancel(narrationTimer)
+        end
+        audio.stop()
+    end
+
+    function scene:destroy(event)
+        if narration then
+            audio.dispose(narration)
+            narration = nil
+        end
+    end
 end
 
 scene:addEventListener("create", scene)
+scene:addEventListener("show", scene)
+scene:addEventListener("hide", scene)
+scene:addEventListener("destroy", scene)
 
 return scene

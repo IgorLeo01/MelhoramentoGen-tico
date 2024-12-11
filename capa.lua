@@ -4,6 +4,20 @@ local audio = require("audio")
 
 local scene = composer.newScene()
 
+local narration
+local narrationTimer
+local soundOn = true
+local soundIcon
+
+
+local function playNarrationWithDelay()
+    if soundOn then
+        audio.play(narration)
+        narrationTimer = timer.performWithDelay(5000, playNarrationWithDelay) 
+    end
+end
+
+
 function scene:create(event)
     local sceneGroup = self.view
 
@@ -75,7 +89,7 @@ function scene:create(event)
         width = 120, 
         height = 40,
         x = display.contentCenterX + 200, 
-        y = 1200, 
+        y = 1000, 
         shape = "rect",
         font = "Inter",
         fontSize = 18,
@@ -87,30 +101,63 @@ function scene:create(event)
     })
     scrollView:insert(nextButton) 
 
-   
-    local soundOn = true
-    local soundIcon
+    narration = audio.loadStream("audio/Capa.wav") 
 
     
     local function toggleSound()
         soundOn = not soundOn
         if soundOn then
             print("Som ativado!")
-            audio.resume()
+            playNarrationWithDelay()
+            --audio.resume()--
             soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" }
         else
             print("Som desativado!")
-            audio.pause()
+            timer.cancel(narrationTimer) 
+            audio.stop()
             soundIcon.fill = { type = "image", filename = "images/ComponentSoundMute.png" } 
         end
     end
 
     
-    soundIcon = display.newRect(display.contentWidth - 60, 60, 40, 40)
+    soundIcon = display.newRect(display.contentWidth - 60, 110, 40, 40)
     soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" } 
+    soundIcon:setFillColor(1, 1, 1)
     soundIcon:addEventListener("tap", toggleSound) 
     sceneGroup:insert(soundIcon) 
 end
 
+function scene:show(event)
+    if event.phase == "did" then
+        audio.stop()  
+        
+        if soundOn then
+            audio.rewind(narration) 
+            playNarrationWithDelay()
+        end
+    end
+end
+
+
+function scene:hide(event)
+    if event.phase == "will" then
+        if narrationTimer then
+            timer.cancel(narrationTimer)
+        end
+        audio.stop()
+    end
+end
+
+function scene:destroy(event)
+    if narration then
+        audio.dispose(narration)
+        narration = nil
+    end
+end
+
 scene:addEventListener("create", scene)
+scene:addEventListener("show", scene)
+scene:addEventListener("hide", scene)
+scene:addEventListener("destroy", scene)
+
 return scene

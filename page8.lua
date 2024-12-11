@@ -1,7 +1,20 @@
 local composer = require("composer")
 local widget = require("widget")
+local audio = require("audio")
 
 local scene = composer.newScene()
+
+local soundOn = true
+local narration
+local narrationTimer
+local soundIcon
+
+local function playNarrationWithDelay()
+    if soundOn then
+        audio.play(narration)
+        narrationTimer = timer.performWithDelay(3000, playNarrationWithDelay)
+    end
+end
 
 function scene:create(event)
     local sceneGroup = self.view
@@ -29,37 +42,13 @@ function scene:create(event)
     pageNumber:setFillColor(0, 0, 0)
     scrollView:insert(pageNumber)
 
-    local soundIcon = display.newRect(display.contentWidth - 60, 60, 40, 40)
-    soundIcon.fill = {
-        type = "image",
-        filename = "images/ComponentSound.png"
-    }
-    sceneGroup:insert(soundIcon)
-
-    local function toggleSound()
-        soundOn = not soundOn
-        if soundOn then
-            soundIcon.fill = {
-                type = "image",
-                filename = "images/ComponentSound.png"
-            }
-        else
-            soundIcon.fill = {
-                type = "image",
-                filename = "images/ComponentSoundMute.png"
-            }
-        end
-    end
-
-    soundIcon:addEventListener("tap", toggleSound)
-
     local dna = display.newImageRect("images/DNA.png", 600, 900) 
     dna.x = display.contentCenterX - 150
     dna.y = display.contentCenterY
     scrollView:insert(dna)
 
     local instructions = display.newText({
-        text = "Com a técnica de CRISPR é possível cortar e conectar outros pedaços dos genes ao DNA, tente conectá-los arrastando os pedaços para a fita de DNA nos locais indicados.",
+        text = "Com a técnica de CRISPR é possível cortar e conectar outros pedaços dos genes ao DNA, tente conectá-los colidindo os pedaços para a fita de DNA nos locais indicados para encaixa-los.",
         x = display.contentCenterX + 150,
         y = display.contentCenterY - 230,
         width = 350,
@@ -94,6 +83,23 @@ function scene:create(event)
     }}
 
     local dnaPieces = {}
+
+    local function shineEffect(piece)
+        transition.to(piece, {
+            time = 200, 
+            xScale = 1.2, 
+            yScale = 1.2,
+            alpha = 0.8,  
+            onComplete = function()
+                transition.to(piece, {
+                    time = 200,
+                    xScale = 1,
+                    yScale = 1,
+                    alpha = 1
+                })
+            end
+        })
+    end
 
     for i, slot in ipairs(slots) do
         
@@ -135,6 +141,7 @@ function scene:create(event)
                         target.x = slotRect.x
                         target.y = slotRect.y
                         target.isLocked = true
+                        shineEffect(target)
                     end
                 end
             end
@@ -161,7 +168,7 @@ function scene:create(event)
         width = 74,
         height = 32,
         x = 296 + (74 / 2),
-        y = 1200,
+        y = 950,
         shape = "rect",
         font = "Inter",
         fontSize = 18,
@@ -184,7 +191,7 @@ function scene:create(event)
         width = 88,
         height = 32,
         x = 408 + (88 / 2),
-        y = 1200,
+        y = 950,
         shape = "rect",
         font = "Inter",
         fontSize = 18,
@@ -201,8 +208,64 @@ function scene:create(event)
         end
     })
     scrollView:insert(nextButton)
+    narration = audio.loadStream("audio/Página8.wav")
+
+    local function toggleSound()
+        soundOn = not soundOn
+        if soundOn then
+            soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" }
+            print("Som ativado!")
+            playNarrationWithDelay()
+        else
+            soundIcon.fill = { type = "image", filename = "images/ComponentSoundMute.png" }
+            print("Som desativado!")
+            if narrationTimer then
+                timer.cancel(narrationTimer)
+            end
+            audio.stop()
+        end
+    end
+    
+    soundIcon = display.newRect(display.contentWidth - 60, 110, 40, 40)
+    soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" } 
+    soundIcon:setFillColor(1, 1, 1)
+    soundIcon:addEventListener("tap", toggleSound) 
+    sceneGroup:insert(soundIcon) 
+end
+
+
+function scene:show(event)
+    if event.phase == "did" then
+        
+        audio.stop()  
+        
+        if soundOn then
+            audio.rewind(narration)  
+            playNarrationWithDelay()
+        end
+    end
+end
+
+
+function scene:hide(event)
+    if event.phase == "will" then
+        if narrationTimer then
+            timer.cancel(narrationTimer)
+        end
+        audio.stop()
+    end
+
+    function scene:destroy(event)
+        if narration then
+            audio.dispose(narration)
+            narration = nil
+        end
+    end
 end
 
 scene:addEventListener("create", scene)
+scene:addEventListener("show", scene)
+scene:addEventListener("hide", scene)
+scene:addEventListener("destroy", scene)
 
 return scene
