@@ -48,7 +48,7 @@ function scene:create(event)
     scrollView:insert(dna)
 
     local instructions = display.newText({
-        text = "Com a técnica de CRISPR é possível cortar e conectar outros pedaços dos genes ao DNA, tente conectá-los colidindo os pedaços para a fita de DNA nos locais indicados para encaixa-los.",
+        text = "Com a técnica de CRISPR é possível cortar e conectar outros pedaços dos genes ao DNA, tente conectá-los colidindo os pedaços para a fita de DNA nos locais indicados para encaixá-los.",
         x = display.contentCenterX + 150,
         y = display.contentCenterY - 230,
         width = 350,
@@ -208,7 +208,7 @@ function scene:create(event)
         end
     })
     scrollView:insert(nextButton)
-    narration = audio.loadStream("audio/Página8.wav")
+    narration = audio.loadStream("audio/pagina8.wav")
 
     local function toggleSound()
         soundOn = not soundOn
