@@ -97,7 +97,7 @@ function scene:create(event)
         labelColor = { default = { 0, 0, 0 }, over = { 1, 1, 1 } },
         fillColor = { default = { 0.9, 0.9, 0.9 }, over = { 0.7, 0.7, 0.7 } },
         onRelease = function()
-            composer.gotoScene("page9") 
+            composer.gotoScene("page10") 
         end,
     })
     scrollView:insert(backButton) 

@@ -12,7 +12,7 @@ local soundIcon
 local function playNarrationWithDelay()
     if soundOn then
         audio.play(narration)
-        narrationTimer = timer.performWithDelay(5000, playNarrationWithDelay) 
+        narrationTimer = timer.performWithDelay(10000, playNarrationWithDelay) 
     end
 end
 
@@ -22,7 +22,7 @@ local function createBlurredWatermelon()
     end
     watermelonModified = display.newImageRect("images/melanciaBlur.png", 213, 213)
     watermelonModified.x = 477 + (213 / 2)
-    watermelonModified.y = 760 + (213 / 2)
+    watermelonModified.y = 710 + (213 / 2)
     scrollView:insert(watermelonModified)
 
     watermelonModified:addEventListener("tap", function()
@@ -35,6 +35,18 @@ local function createBlurredWatermelon()
         scrollView:insert(watermelonRevealed)
         display.remove(watermelonModified)
         watermelonModified = nil
+
+        local interactionMessage = display.newText({
+            text = "A imagem que você revelou é de uma melancia sem sementes, fruta resultante do melhoramento genético.",
+            x = display.contentCenterX,
+            y = 920,
+            width = 700,
+            font = native.systemFont,
+            fontSize = 18,
+            align = "center",
+        })
+        interactionMessage:setFillColor(0, 0, 0)
+        scrollView:insert(interactionMessage)
     end)
 end
 
@@ -68,8 +80,6 @@ function scene:create(event)
     leafIcon.x = 77 + (136 / 2)
     leafIcon.y = 8 + (165 / 2)
     scrollView:insert(leafIcon)
-
-
 
     local title = display.newText({
         text = "Introdução ao melhoramento genético",
@@ -107,9 +117,8 @@ function scene:create(event)
     paragraph2:setFillColor(0, 0, 0)
     scrollView:insert(paragraph2)
 
-
     local paragraph3 = display.newText({
-        text = " Exemplo: Uma prática frequente no setor agrícola é a modificação de sementes de plantas que resultam em frutos sem sementes, representando uma das aplicações do melhoramento genético. Podemos ver isso exemplificado abaixo se clicarmos na melancia borrada:",
+        text = " Exemplo: Uma prática frequente no setor agrícola é a modificação de sementes de plantas que resultam em frutos sem sementes, representando uma das aplicações do melhoramento genético. Vamos ver isso de forma prática, clique na imagem da fruta borrada para entender uma das modificações possíveis em frutas com melhoramento genético",
         x = display.contentCenterX,
         y = 710,
         width = 700,
@@ -119,16 +128,15 @@ function scene:create(event)
     })
     paragraph3:setFillColor(0, 0, 0)
     scrollView:insert(paragraph3)
-    
 
     local watermelonOriginal = display.newImageRect("images/MelanciaCaroco.png", 213, 213)
     watermelonOriginal.x = 38 + (213 / 2)
-    watermelonOriginal.y = 760 + (213 / 2)
+    watermelonOriginal.y = 720 + (213 / 2)
     scrollView:insert(watermelonOriginal)
 
     local arrowImage = display.newImageRect("images/Arrow12.png", 150, 50) 
     arrowImage.x = display.contentCenterX
-    arrowImage.y = 760 + (213 / 2) 
+    arrowImage.y = 710 + (213 / 2) 
     scrollView:insert(arrowImage)
 
     createBlurredWatermelon()
@@ -155,45 +163,46 @@ function scene:create(event)
     })
     scrollView:insert(backButton)
 
-local nextButton = widget.newButton({
-    label = "Próximo",
-    width = 88,
-    height = 32,
-    x = 408 + (88 / 2),
-    y = 1000, 
-    shape = "rect",
-    font = native.systemFont,
-    fontSize = 18,
-    labelColor = { default = { 0, 0, 0 }, over = { 1, 1, 1 } },
-    fillColor = { default = { 0.9, 0.9, 0.9 }, over = { 0.7, 0.7, 0.7 } },
-    onRelease = function()
-        composer.gotoScene("page3") 
-    end,
-})
-scrollView:insert(nextButton)
-narration = audio.loadStream("audio/Página2.wav")
+    local nextButton = widget.newButton({
+        label = "Próximo",
+        width = 88,
+        height = 32,
+        x = 408 + (88 / 2),
+        y = 1000, 
+        shape = "rect",
+        font = native.systemFont,
+        fontSize = 18,
+        labelColor = { default = { 0, 0, 0 }, over = { 1, 1, 1 } },
+        fillColor = { default = { 0.9, 0.9, 0.9 }, over = { 0.7, 0.7, 0.7 } },
+        onRelease = function()
+            composer.gotoScene("page3") 
+        end,
+    })
+    scrollView:insert(nextButton)
 
-local function toggleSound()
-    soundOn = not soundOn
-    if soundOn then
-        soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" }
-        print("Som ativado!")
-        playNarrationWithDelay()
-    else
-        soundIcon.fill = { type = "image", filename = "images/ComponentSoundMute.png" }
-        print("Som desativado!")
-        if narrationTimer then
-            timer.cancel(narrationTimer)
+    narration = audio.loadStream("audio/Página2.wav")
+
+    local function toggleSound()
+        soundOn = not soundOn
+        if soundOn then
+            soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" }
+            print("Som ativado!")
+            playNarrationWithDelay()
+        else
+            soundIcon.fill = { type = "image", filename = "images/ComponentSoundMute.png" }
+            print("Som desativado!")
+            if narrationTimer then
+                timer.cancel(narrationTimer)
+            end
+            audio.stop()
         end
-        audio.stop()
     end
-end
 
-soundIcon = display.newRect(display.contentWidth - 60, 110, 40, 40)
-soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" } 
-soundIcon:setFillColor(1, 1, 1)
-soundIcon:addEventListener("tap", toggleSound) 
-sceneGroup:insert(soundIcon) 
+    soundIcon = display.newRect(display.contentWidth - 60, 110, 40, 40)
+    soundIcon.fill = { type = "image", filename = "images/ComponentSound.png" } 
+    soundIcon:setFillColor(1, 1, 1)
+    soundIcon:addEventListener("tap", toggleSound) 
+    sceneGroup:insert(soundIcon) 
 end
 
 function scene:show(event)
@@ -206,7 +215,6 @@ function scene:show(event)
         end
     end
 end
-
 
 function scene:hide(event)
     if event.phase == "will" then

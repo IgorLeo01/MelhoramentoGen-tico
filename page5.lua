@@ -88,11 +88,21 @@ function scene:create(event)
 
     local function checkInside()
         if dolphinInside and whaleInside then
-
             local wholphin = display.newImageRect("images/Wholphin.png", 200, 200)
             wholphin.x = square.x
             wholphin.y = square.y
             scrollView:insert(wholphin)
+
+            local successMessage = display.newText({
+                text = "Você criou um Wholphin!",
+                x = display.contentCenterX,
+                y = square.y + 150,
+                font = "Inter",
+                fontSize = 22,
+                align = "center"
+            })
+            successMessage:setFillColor(0, 0, 0)
+            scrollView:insert(successMessage)
 
             display.remove(dolphin)
             display.remove(whale)
@@ -135,6 +145,7 @@ function scene:create(event)
     dolphin:addEventListener("touch", dragImage)
     whale:addEventListener("touch", dragImage)
 
+   
     local paragraph1 = display.newText({
         text = "    Hibridização Interespecífica: ocorre ao realizar a junção de duas espécies diferentes, como é o exemplo do cruzamento de uma vaca com um búfalo para gerar o 'Beefalo', uma combinação de carne de alta qualidade com maior adaptabilidade ambiental.",
         x = display.contentCenterX,
@@ -148,9 +159,9 @@ function scene:create(event)
     scrollView:insert(paragraph1)
 
     local paragraph2 = display.newText({
-        text = "    A hibridização permite a criação de organismos com características que não seriam possíveis através de cruzamentos dentro da mesma espécie. Organismos híbridos frequentemente exibem vigor híbrido (ou heterose), uma melhora nas características que pode incluir maior crescimento, resistência a doenças, ou melhor adaptação a condições adversas.",
+        text = "    A hibridização permite a criação de organismos com características que não seriam possíveis através de cruzamentos dentro da mesma espécie. Exemplo: Junção entre golfinhos e falsas-orcas, dão origem a uma espécie chamada Wholphin. Vamos ver isso na prática, junte as duas espécies arrastando-as para dentro do quadrado e veja o que acontece.",
         x = display.contentCenterX,
-        y = 430,
+        y = 450,
         width = 690,
         font = "Inter",
         fontSize = 20,
@@ -159,22 +170,11 @@ function scene:create(event)
     paragraph2:setFillColor(0, 0, 0)
     scrollView:insert(paragraph2)
 
-    local paragraph3 = display.newText({
-        text = "    Exemplo: Junção entre golfinhos e falsas-orcas, dão origem a uma espécie chamada Wholphin. Junte as duas espécies arrastando-as para dentro do quadrado e veja o que acontece.",
-        x = display.contentCenterX,
-        y = 1000,
-        width = 690,
-        font = "Inter",
-        fontSize = 20,
-        align = "left"
-    })
-    paragraph3:setFillColor(0, 0, 0)
-    scrollView:insert(paragraph3)
-
     local bottomLeafIcon = display.newImageRect("images/FolhaInferior.png", 136, 165)
     bottomLeafIcon.x = -11 + (136 / 2)
     bottomLeafIcon.y = 1100 + (165 / 2)
     scrollView:insert(bottomLeafIcon)
+
 
     local backButton = widget.newButton({
         label = "Voltar",
@@ -221,7 +221,10 @@ function scene:create(event)
         end
     })
     scrollView:insert(nextButton)
+
+
     narration = audio.loadStream("audio/Página5.wav")
+
 
     local function toggleSound()
         soundOn = not soundOn
@@ -246,32 +249,32 @@ function scene:create(event)
     sceneGroup:insert(soundIcon) 
 end
 
-    function scene:show(event)
-        if event.phase == "did" then
-            audio.stop()
+function scene:show(event)
+    if event.phase == "did" then
+        audio.stop()
 
-            if soundOn then
-                audio.rewind(narration)
-                playNarrationWithDelay()
-            end
+        if soundOn then
+            audio.rewind(narration)
+            playNarrationWithDelay()
         end
     end
+end
 
-    function scene:hide(event)
-        if event.phase == "will" then
-            if narrationTimer then
-                timer.cancel(narrationTimer)
-            end
-            audio.stop()
+function scene:hide(event)
+    if event.phase == "will" then
+        if narrationTimer then
+            timer.cancel(narrationTimer)
         end
+        audio.stop()
     end
+end
 
-    function scene:destroy(event)
-        if narration then
-            audio.dispose(narration)
-            narration = nil
-        end
+function scene:destroy(event)
+    if narration then
+        audio.dispose(narration)
+        narration = nil
     end
+end
 
 scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)

@@ -322,7 +322,7 @@ function scene:create(event)
             over = {0.7, 0.7, 0.7}
         },
         onRelease = function()
-            composer.gotoScene("contraCapa") 
+            composer.gotoScene("page10") 
         end
     })
     scrollView:insert(nextButton)
